@@ -1,0 +1,468 @@
+openapi: 3.0.1
+info:
+  title: Topcoder Timeline Wall REST API
+  version: v1
+paths:
+  /timelineEvents:
+    get:
+      tags:
+        - TimelineEvent
+      summary: Gets all Approved Timeline Events.
+      description: Return all events where Status is 'Approved'.
+      responses:
+        '200':
+          description: Request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEventBasicInfoModel'
+        '500':
+          description: Any error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      tags:
+        - TimelineEvent
+      summary: Creates a new Event.
+      description: "<p>The content will be provided as 'multipart/form-data' because it will contain both text data and binary files (photo/video).</p>\r\n<p>Upload media files to Amazon CDN, then set preview and image/video urls to 'mediaFiles' and save data to DB.</p>\r\n            For Admin:\r\n            <p>Set the status of Event to 'Approved'.</p><br />\r\n            For regular User:\r\n            <p>Set the status of Event to 'InReview'.</p><p>Construct email from the New Event email template and send it to the user. The template should be configurable.</p><br />"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimelineEventModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimelineEventModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreateTimelineEventModel'
+      responses:
+        '200':
+          description: Request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEventModel'
+        '400':
+          description: Input data validation failed. When request body is wrong.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Authentication failed. When token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Any other error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /timelineEvents/{id}:
+    get:
+      tags:
+        - TimelineEvent
+      summary: Get Event by given Id.
+      description: Return Event with the given Id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEventModel'
+        '400':
+          description: Input data validation failed. When 'id' is not positive integer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Entity not found. When Timeline Event with given Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Any other error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    delete:
+      tags:
+        - TimelineEventManagement
+      summary: Deletes Event with the given Id.
+      description: "<p>Only Admin Role allowed.</p>\r\n            Change the status of Event with the given Id to 'Deleted'."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Request was successful.
+        '400':
+          description: Input data validation failed. When 'id' is not positive integer or request body is wrong.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Authentication failed. When token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Authorization failed. When user is not allowed to perform current operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Entity not found. When Timeline Event with given Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Any other error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /timelineEvents/review:
+    get:
+      tags:
+        - TimelineEventManagement
+      summary: Gets all Timeline Events which are under review.
+      description: "<p>Only Admin Role allowed.</p>\r\n            Return all events where Status is 'InReview'."
+      responses:
+        '200':
+          description: Request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEventBasicInfoModel'
+        '500':
+          description: Any error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /timelineEvents/{id}/approve:
+    put:
+      tags:
+        - TimelineEventManagement
+      summary: Approves Event with the given Id.
+      description: "<p>Only Admin Role allowed.</p>\r\n<p>Change the status of Event with the given Id to 'Approved'.</p>\r\n<p>Set the rejected Reason and Note for the given Event.</p>\r\n<p>Construct email from the Approval email template and send it to the user. The template should be configurable.</p>"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Request was successful.
+        '400':
+          description: Input data validation failed. When 'id' is not positive integer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Authentication failed. When token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Authorization failed. When user is not allowed to perform current operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Entity not found. When Timeline Event with given Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Any other error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /timelineEvents/{id}/reject:
+    put:
+      tags:
+        - TimelineEventManagement
+      summary: Rejects Event with the given Id.
+      description: "<p>Only Admin Role allowed.</p>\r\n<p>Change the status of Event with the given Id to 'Rejected'.</p>\r\n<p>Set the rejected Reason and Note for the given Event.</p>\r\n<p>Construct email from the Rejection email template and send it to the user. The template should be configurable.</p>"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRejectionModel'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/EventRejectionModel'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/EventRejectionModel'
+      responses:
+        '200':
+          description: Request was successful.
+        '400':
+          description: Input data validation failed. When 'id' is not positive integer or request body is wrong.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Authentication failed. When token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Authorization failed. When user is not allowed to perform current operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Entity not found. When Timeline Event with given Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Any other error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /auth/currentUser:
+    get:
+      tags:
+        - User
+      summary: Gets logged in user details.
+      description: Check if logged in user is in the configured Admin, then construct and return the response model.
+      responses:
+        '200':
+          description: Request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserModel'
+        '401':
+          description: Authentication failed. When token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Any error on Server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+components:
+  schemas:
+    EventMediaFile:
+      required:
+        - previewUrl
+        - url
+      type: object
+      properties:
+        url:
+          maxLength: 50
+          type: string
+        previewUrl:
+          maxLength: 50
+          type: string
+      additionalProperties: false
+    TimelineEventBasicInfoModel:
+      required:
+        - createdBy
+        - createdDate
+        - description
+        - eventDate
+        - id
+        - title
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          maxLength: 38
+          type: string
+        description:
+          maxLength: 240
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        mediaFiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventMediaFile'
+          nullable: true
+        createdDate:
+          type: string
+          format: date-time
+        createdBy:
+          maxLength: 100
+          type: string
+      additionalProperties: false
+    ApiError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Gets or sets the message.
+          nullable: true
+      additionalProperties: false
+      description: An API error Model.
+    CreateTimelineEventModel:
+      required:
+        - description
+        - eventDate
+        - title
+      type: object
+      properties:
+        title:
+          maxLength: 38
+          type: string
+        description:
+          maxLength: 240
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        mediaFiles:
+          type: array
+          items:
+            type: string
+            format: binary
+          nullable: true
+      additionalProperties: false
+    EventStatus:
+      enum:
+        - InReview
+        - Approved
+        - Rejected
+        - Deleted
+      type: string
+    TimelineEventModel:
+      required:
+        - createdBy
+        - description
+        - id
+        - title
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          maxLength: 38
+          type: string
+        description:
+          maxLength: 240
+          type: string
+        eventDate:
+          type: string
+          format: date-time
+        mediaFiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventMediaFile'
+          nullable: true
+        status:
+          $ref: '#/components/schemas/EventStatus'
+        rejectionReason:
+          maxLength: 38
+          type: string
+          nullable: true
+        rejectionNote:
+          maxLength: 240
+          type: string
+          nullable: true
+        createdDate:
+          type: string
+          format: date-time
+        createdBy:
+          maxLength: 100
+          type: string
+        lastUpdatedDate:
+          type: string
+          format: date-time
+          nullable: true
+        lastUpdatedBy:
+          maxLength: 100
+          type: string
+          nullable: true
+      additionalProperties: false
+    EventRejectionModel:
+      required:
+        - note
+        - reason
+      type: object
+      properties:
+        reason:
+          maxLength: 34
+          type: string
+        note:
+          maxLength: 240
+          type: string
+      additionalProperties: false
+    UserModel:
+      type: object
+      properties:
+        handle:
+          type: string
+          nullable: true
+        isAdmin:
+          type: boolean
+      additionalProperties: false
+  securitySchemes:
+    JWT:
+      type: http
+      description: Authentication using JWT Token in header.
+      scheme: Bearer
+security:
+  - {}
