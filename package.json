@@ -1,0 +1,34 @@
+{
+  "name": "timeline-wall-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon run start",
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1221.0",
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-fileupload": "^1.4.0",
+    "ffmpeg-static": "^5.1.0",
+    "joi": "^17.6.0",
+    "lodash": "^4.17.21",
+    "pg": "^8.8.0",
+    "sharp": "^0.31.0",
+    "simple-thumbnail": "^1.6.5",
+    "tc-core-library-js": "github:appirio-tech/tc-core-library-js#v2.6",
+    "topcoder-bus-api-wrapper": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}

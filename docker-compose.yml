@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  timeline-backend:
+    build: .
+    ports:
+      - '3001:3001'
+    environment:
+      - DB_HOST=host.docker.internal
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=topcoder-timeline
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./docs/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./docs/fill_table.sql:/docker-entrypoint-initdb.d/fill_table.sql
+
