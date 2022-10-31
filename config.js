@@ -12,7 +12,7 @@ module.exports = {
 
     AMAZON: {
         IS_LOCAL: process.env.IS_LOCAL_DB,
-        ENDPOINT: process.env.AWS_ENDPOINT,
+        ENDPOINT: process.env.AWS_ENDPOINT, // only for local deployment
         S3_API_VERSION: process.env.S3_API_VERSION || '2006-03-01',
         AWS_REGION: process.env.AWS_REGION || 'us-east-1',
         BUCKET_NAME: process.env.BUCKET_NAME || 'tc-timelline-wall-bucket',
