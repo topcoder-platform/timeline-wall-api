@@ -15,8 +15,6 @@ module.exports = {
         ENDPOINT: process.env.AWS_ENDPOINT,
         S3_API_VERSION: process.env.S3_API_VERSION || '2006-03-01',
         AWS_REGION: process.env.AWS_REGION || 'us-east-1',
-        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || 'AKIAWJRN2LPRCMAXSS2J',
-        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '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',
         BUCKET_NAME: process.env.BUCKET_NAME || 'tc-timelline-wall-bucket',
     },
 
