@@ -5,12 +5,14 @@ TimelineEventsService = require('./services/TimelineEventService')
 TimelineEventsRepository = require('./repositories/TimelineEventsRepository')
 
 AuthController = require('./controllers/AuthController')
+HealthController = require('./controllers/HealthController')
 
 timelineEventsRepository =  new TimelineEventsRepository(getPool())
 timelineEventsService = new TimelineEventsService(timelineEventsRepository)
 timelineEventsController = new TimelineEventsController(timelineEventsService)
 
 authController = new AuthController()
+healthController = new HealthController()
 
 module.exports = {
     '/timeLineEvents': {
@@ -55,6 +57,12 @@ module.exports = {
         get: {
             method: authController.getCurrentUserDetails.bind(authController),
             auth: true
+        }
+    },
+    '/health': {
+        get: {
+            method: healthController.checkHealth.bind(healthController),
+            auth: false
         }
     }
 
