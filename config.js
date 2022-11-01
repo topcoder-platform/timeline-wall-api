@@ -2,6 +2,7 @@ require('dotenv').config()
 
 module.exports = {
     SERVER_PORT: process.env.SERVER_PORT || 3001,
+    API_PREFIX: '/v5/timeline-wall',
 
     AUTH_SECRET: process.env.AUTH_SECRET || 'mysecret',
     VALID_ISSUERS: process.env.VALID_ISSUERS || '["https://api.topcoder-dev.com", "https://api.topcoder.com", "https://topcoder-dev.auth0.com/", "https://auth.topcoder-dev.com/"]',
