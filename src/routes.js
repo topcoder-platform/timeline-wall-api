@@ -1,4 +1,5 @@
 const { getPool } = require("./repositories/db-helper");
+const config = require("../config")
 express = require('express')
 TimelineEventsController = require('./controllers/TimelineEventsController')
 TimelineEventsService = require('./services/TimelineEventService')
@@ -15,7 +16,7 @@ authController = new AuthController()
 healthController = new HealthController()
 
 module.exports = {
-    '/timeLineEvents': {
+    [`${config.API_PREFIX}/timeLineEvents`]: {
         get: {
             method: timelineEventsController.getTimelineEvents.bind(timelineEventsController),
             auth: false
@@ -25,13 +26,13 @@ module.exports = {
             auth: true
         }
     },
-    '/timelineEvents/review': {
+    [`${config.API_PREFIX}/timelineEvents/review`]: {
         get: {
             method: timelineEventsController.getTimelineEventsInReview.bind(timelineEventsController),
             auth: true
         }
     },
-    '/timelineEvents/:event_id': {
+    [`${config.API_PREFIX}/timelineEvents/:event_id`]: {
         get: {
             method: timelineEventsController.getTimelineEventById.bind(timelineEventsController),
             auth: false
@@ -41,25 +42,25 @@ module.exports = {
             auth: true
         }
     },
-    '/timelineEvents/:event_id/approve': {
+    [`${config.API_PREFIX}/timelineEvents/:event_id/approve`]: {
         put: {
             method: timelineEventsController.approveTimelineEvent.bind(timelineEventsController),
             auth: true
         }
     },
-    '/timelineEvents/:event_id/reject': {
+    [`${config.API_PREFIX}/timelineEvents/:event_id/reject`]: {
         put: {
             method: timelineEventsController.rejectTimelineEvent.bind(timelineEventsController),
             auth: true
         }
     },
-    '/auth/currentUser': {
+    [`${config.API_PREFIX}/auth/currentUser`]: {
         get: {
             method: authController.getCurrentUserDetails.bind(authController),
             auth: true
         }
     },
-    '/health': {
+    [`${config.API_PREFIX}/health`]: {
         get: {
             method: healthController.checkHealth.bind(healthController),
             auth: false
