@@ -49,4 +49,5 @@ module.exports = {
     PREVIEW_MAX_WIDTH: parseInt(process.env.PREVIEW_WIDTH) || 600,
     PREVIEW_MAX_HEIGHT: parseInt(process.env.PREVIEW_HEIGHT) || 200,
     MEDIA_SIZE_LIMIT: parseInt(process.env.MEDIA_SIZE_LIMIT) || undefined,
+    HEALTH_CHECK_TIMEOUT: parseInt(process.env.HEALTH_CHECK_TIMEOUT) || 3000,
 }
