@@ -1,10 +1,10 @@
-const {ForbiddenError, NotFoundError} = require("../errors/custom-errors");
-const {toReducedTimelineEvent, toCompleteTimelineEvent} = require("../models/dto-helpers");
+const { ForbiddenError, NotFoundError } = require("../errors/custom-errors");
+const { toReducedTimelineEvent, toCompleteTimelineEvent } = require("../models/dto-helpers");
 const helper = require('./helpers')
 const constants = require('../../constants')
 
 module.exports = class TimelineEventService {
-    constructor(timelineEventRepository){
+    constructor(timelineEventRepository) {
         this.timelineEventRepository = timelineEventRepository
     }
 
@@ -14,7 +14,7 @@ module.exports = class TimelineEventService {
     }
 
     async getInReviewEvents(authUser) {
-        if(!authUser.isAdmin) {
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can view events in review.')
         }
 
@@ -22,7 +22,7 @@ module.exports = class TimelineEventService {
         return events.map(toReducedTimelineEvent)
     }
 
-    async addEvent(title, description, eventDate, mediaFiles, authUser){
+    async addEvent(title, description, eventDate, mediaFiles, authUser) {
 
         const status = authUser.isAdmin ? 'Approved' : 'InReview'
 
@@ -34,7 +34,7 @@ module.exports = class TimelineEventService {
 
         const completeTimelineEvent = toCompleteTimelineEvent(result)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_CREATED, [{email: authUser.email}],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_CREATED, [{ email: authUser.email }],
             completeTimelineEvent)
 
         return completeTimelineEvent
@@ -45,7 +45,7 @@ module.exports = class TimelineEventService {
     }
 
     async deleteEvent(event_id, authUser) {
-        if(!authUser.isAdmin){
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can delete events.')
         }
 
@@ -53,12 +53,12 @@ module.exports = class TimelineEventService {
     }
 
     async approveEvent(event_id, authUser) {
-        if(!authUser.isAdmin){
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can approve events.')
         }
 
         const eventToApprove = await this.getEventById(event_id)
-        if(eventToApprove.status !== 'InReview'){
+        if (eventToApprove.status !== 'InReview') {
             throw new NotFoundError(`Event with id ${event_id} is not under review`)
         }
 
@@ -68,21 +68,21 @@ module.exports = class TimelineEventService {
 
         const email = await helper.getEmail(completeEvent.createdBy)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_APPROVED, [{email}],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_APPROVED, [{ email }],
             completeEvent)
     }
 
     async rejectEvent(event_id, reason, note, authUser) {
-        if(!authUser.isAdmin){
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can reject events.')
         }
 
         const eventToReject = await this.getEventById(event_id)
-        if(eventToReject.status !== 'InReview'){
+        if (eventToReject.status !== 'InReview') {
             throw new NotFoundError(`Event with id ${event_id} is not under review`)
         }
 
-        const result = await this.timelineEventRepository.rejectEvent(event_id,reason, note, authUser.handle)
+        const result = await this.timelineEventRepository.rejectEvent(event_id, reason, note, authUser.handle)
 
         const completeEvent = toCompleteTimelineEvent(result)
 
@@ -92,7 +92,7 @@ module.exports = class TimelineEventService {
             email = "mess@gmail.com"
         }
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{email}],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{ email }],
             completeEvent)
     }
 }

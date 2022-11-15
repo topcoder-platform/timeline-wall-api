@@ -1,9 +1,9 @@
-const {Pool} = require("pg");
+const { Pool } = require("pg");
 const config = require('../../config')
 let pool
 
 function getPool() {
-    if(!pool){
+    if (!pool) {
         pool = new Pool({
             user: config.DATABASE.USER,
             host: config.DATABASE.HOST,
