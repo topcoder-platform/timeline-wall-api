@@ -8,7 +8,7 @@ TimelineEventsRepository = require('./repositories/TimelineEventsRepository')
 AuthController = require('./controllers/AuthController')
 HealthController = require('./controllers/HealthController')
 
-timelineEventsRepository =  new TimelineEventsRepository(getPool())
+timelineEventsRepository = new TimelineEventsRepository(getPool())
 timelineEventsService = new TimelineEventsService(timelineEventsRepository)
 timelineEventsController = new TimelineEventsController(timelineEventsService)
 

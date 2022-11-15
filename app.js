@@ -17,7 +17,7 @@ app.use(
 )
 app.use(fileUpload({
     limits: {
-        fileSize:  config.MEDIA_SIZE_LIMIT
+        fileSize: config.MEDIA_SIZE_LIMIT
     },
     abortOnLimit: true
 }))

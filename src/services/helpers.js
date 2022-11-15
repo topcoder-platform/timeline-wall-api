@@ -18,7 +18,7 @@ const awsConfig = {
     region: config.AMAZON.AWS_REGION
 }
 
-if(config.AMAZON.IS_LOCAL){
+if (config.AMAZON.IS_LOCAL) {
     awsConfig.endpoint = config.AMAZON.ENDPOINT
     awsConfig.s3ForcePathStyle = true
 }
@@ -36,7 +36,7 @@ let busApiClient
  * Get Bus API Client, instantiate it if it doesn't exist
  * @return {Object} Bus API Client Instance
  */
-function getBusApiClient () {
+function getBusApiClient() {
     // if there is no bus API client instance, then create a new instance
     if (!busApiClient) {
         busApiClient = busApi(_.pick(config,
@@ -51,7 +51,7 @@ function getBusApiClient () {
  * Get M2M token.
  * @returns {Promise<String>} the M2M token
  */
-async function getM2MToken () {
+async function getM2MToken() {
     const res = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
     return res
 }
@@ -76,7 +76,7 @@ async function uploadToBucket(data, fileName, mimetype) {
 
 async function createPreviewImage(data, numOfFiles = 1) {
     const width = config.PREVIEW_MAX_WIDTH / numOfFiles
-    return await sharp(data).resize(width, config.PREVIEW_MAX_HEIGHT, {fit: 'inside'}).toBuffer()
+    return await sharp(data).resize(width, config.PREVIEW_MAX_HEIGHT, { fit: 'inside' }).toBuffer()
 }
 
 async function createThumbnail(data, numOfFiles) {
@@ -91,15 +91,15 @@ async function uploadMedia(file, handle, numOfFiles) {
     const fileExt = file.name.substr(file.name.lastIndexOf('.'))
     const fileName = handle + '-' + new Date().getTime()
 
-    const url = await uploadToBucket(file.data, fileName+fileExt, file.mimetype)
+    const url = await uploadToBucket(file.data, fileName + fileExt, file.mimetype)
 
     let previewUrl = url
-    if(file.mimetype.includes('image')){
+    if (file.mimetype.includes('image')) {
         const previewData = await createPreviewImage(file.data, numOfFiles)
-        previewUrl = await uploadToBucket(previewData, fileName+'-preview.jpg', 'image/jpeg')
-    }else if(file.mimetype.includes('video')){
+        previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
+    } else if (file.mimetype.includes('video')) {
         const previewData = await createThumbnail(url, numOfFiles)
-        previewUrl = await uploadToBucket(previewData, fileName+'-preview.jpg', 'image/jpeg')
+        previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
     }
 
     return {
@@ -114,7 +114,7 @@ async function uploadMedia(file, handle, numOfFiles) {
  * @param {Object} payload the event payload
  * @param {Object} options the extra options to the message
  */
-async function postBusEvent (topic, payload, options = {}) {
+async function postBusEvent(topic, payload, options = {}) {
     const client = getBusApiClient()
     const message = {
         topic,
@@ -135,7 +135,7 @@ async function postBusEvent (topic, payload, options = {}) {
  * @param {Array} recipients the array of recipients in { userId || email || handle } format
  * @param {Object} data the data
  */
-async function sendEmail (type, recipients, data) {
+async function sendEmail(type, recipients, data) {
     try {
         const res = await postBusEvent(constants.NOTIFICATIONS_TOPIC, {
             notifications: [
@@ -159,10 +159,10 @@ async function sendEmail (type, recipients, data) {
     }
 }
 
-async function getEmail(handle){
+async function getEmail(handle) {
     const token = await getM2MToken()
 
-    const response = await axios.get(config.EMAIL.MEMBER_API_BASE_URL+`/members/${handle}`,{
+    const response = await axios.get(config.EMAIL.MEMBER_API_BASE_URL + `/members/${handle}`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
