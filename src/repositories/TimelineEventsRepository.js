@@ -13,10 +13,15 @@ module.exports = class TimelineEventsRepository {
     }
 
     async addEvent(title, description, eventDate, mediaFiles, status, user) {
-        const date = new Date()
-        const { rows } = await this.pool.query(`INSERT INTO "events" ("title", "description", "event_date", "media_files", "status", "created_by", "created_date", "last_updated_by", "last_updated_date")  
+        try {
+            const date = new Date()
+            const { rows } = await this.pool.query(`INSERT INTO "events" ("title", "description", "event_date", "media_files", "status", "created_by", "created_date", "last_updated_by", "last_updated_date") 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`, [title, description, eventDate, mediaFiles, status, user, date, user, date])
-        return rows[0]
+            return rows[0]
+        } catch (e) {
+            e.message = `ERROR: Failed to create Event in the Database. Error message: ${e.message}`
+            throw e
+        }
     }
 
     async getEventById(event_id) {
