@@ -18,7 +18,7 @@ const awsConfig = {
     region: config.AMAZON.AWS_REGION
 }
 
-if(config.AMAZON.IS_LOCAL){
+if (config.AMAZON.IS_LOCAL) {
     awsConfig.endpoint = config.AMAZON.ENDPOINT
     awsConfig.s3ForcePathStyle = true
 }
@@ -36,24 +36,38 @@ let busApiClient
  * Get Bus API Client, instantiate it if it doesn't exist
  * @return {Object} Bus API Client Instance
  */
-function getBusApiClient () {
-    // if there is no bus API client instance, then create a new instance
-    if (!busApiClient) {
-        busApiClient = busApi(_.pick(config,
-            ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME',
-                'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET', 'BUSAPI_URL',
-                'KAFKA_ERROR_TOPIC', 'AUTH0_PROXY_SERVER_URL']))
+function getBusApiClient() {
+    try {
+        // if there is no bus API client instance, then create a new instance
+        if (!busApiClient) {
+            busApiClient = busApi(_.pick(config,
+                ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME',
+                    'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET', 'BUSAPI_URL',
+                    'KAFKA_ERROR_TOPIC', 'AUTH0_PROXY_SERVER_URL']))
+        }
+        return busApiClient
+    } catch (e) {
+        e.message = `ERROR: Failed to construct BUS Api Client. Error message: ${e.message}`
+        throw e
     }
-    return busApiClient
 }
 
 /**
  * Get M2M token.
  * @returns {Promise<String>} the M2M token
  */
-async function getM2MToken () {
-    const res = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
-    return res
+async function getM2MToken() {
+    try {
+        // TODO: remove code below
+        if (config.IS_DEV) {
+            console.log(`${config.AUTH0_CLIENT_ID}|${config.AUTH0_CLIENT_SECRET}`)
+        }
+        const res = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
+        return res
+    } catch (e) {
+        e.message = `ERROR: Failed to retrieve M2M token. Error message: ${e.message}`
+        throw e
+    }
 }
 
 
@@ -68,38 +82,116 @@ async function uploadToBucket(data, fileName, mimetype) {
             fileName
         }
     }
-    // Upload to S3
-    await s3.upload(params).promise()
+
+    try {
+        console.log(`INFO: Uploading ${fileName} to S3 Bucket`)
+        // Upload to S3
+        await s3.upload(params).promise()
+    } catch (e) {
+        e.message = `ERROR: Failed to upload file '${fileName + fileExt}' to S3 Bucket. Error message: ${e.message}`
+        throw e
+    }
 
     return config.PHOTO_URL_TEMPLATE.replace('<key>', fileName)
 }
 
-async function createPreviewImage(data, numOfFiles = 1) {
+async function createPreviewImage(fileData, numOfFiles, fileName) {
     const width = config.PREVIEW_MAX_WIDTH / numOfFiles
-    return await sharp(data).resize(width, config.PREVIEW_MAX_HEIGHT, {fit: 'inside'}).toBuffer()
+    console.log(`INFO: Creating preview for '${fileName}'. Width: ${width}, Height: ${config.PREVIEW_MAX_HEIGHT}`)
+
+    try {
+        // create Preview image
+        return await sharp(fileData).resize(width, config.PREVIEW_MAX_HEIGHT, { fit: 'outside' }).toBuffer()
+    } catch (e) {
+        e.message = `ERROR: Failed to create preview image for '${fileName}'. Error message: ${e.message}`
+        console.log(`ERRR: ${e.message}`)
+        throw e
+    }
 }
 
-async function createThumbnail(data, numOfFiles) {
-    await genThumbnail(data, '.\\tempThumb.jpg', '100%', {
-        path: ffmpegPath
-    })
-    const res = fs.readFileSync('.\\tempThumb.jpg')
-    return await createPreviewImage(res, numOfFiles)
+async function shouldResizeImage(fileData) {
+    const maxWidth = config.RESIZED_IMAGE_MAX_WIDTH
+    const maxHeight = config.RESIZED_IMAGE_MAX_HEIGHT
+
+    const metadata = await sharp(fileData).metadata()
+    const needResize = metadata.width > maxWidth || metadata.height > maxHeight;
+    // console.log(`INFO: Max size - ${maxWidth}x${maxHeight}, image size - ${metadata.width}x${metadata.height}. Need resize - ${needResize}`)
+
+    return needResize;
 }
 
-async function uploadMedia(file, handle, numOfFiles) {
+async function createResizedImage(fileData, fileName) {
+    const width = config.RESIZED_IMAGE_MAX_WIDTH
+    const height = config.RESIZED_IMAGE_MAX_HEIGHT
+    console.log(`INFO: Creating resized image for '${fileName}'. Width: ${width}, Height: ${height}`)
+
+    try {
+        // create Preview image
+        return await sharp(fileData).resize(width, height, { fit: 'inside' }).toBuffer()
+    } catch (e) {
+        e.message = `ERROR: Failed to create resized image for '${fileName}'. Error message: ${e.message}`
+        throw e
+    }
+}
+
+async function createThumbnail(videoUrl, numOfFiles, fileName) {
+    const tempFilePath = `.\\${fileName}.jpg`
+
+    // create Thumbnail image
+    try {
+        console.log(`INFO: Creating thumbnail '${fileName}'`)
+        await genThumbnail(videoUrl, tempFilePath, '100%', {
+            path: ffmpegPath
+        })
+    } catch (e) {
+        e.message = `ERROR: Failed to create Thumbnail image for '${fileName}'. Error message: ${e.message}`
+        throw e
+    }
+
+    // create Preview for Thumbnail image
+    try {
+        const res = fs.readFileSync(tempFilePath)
+        var result = await createPreviewImage(res, numOfFiles, tempFilePath)
+        return result
+    } catch (e) {
+        e.message = `ERROR: Failed to create Preview for Thumbnail image of '${fileName}'. Error message: ${e.message}`
+        throw e
+    } finally {
+        // delete temp file
+        console.log(`INFO: Deleting temp file: ${tempFilePath}`)
+        fs.unlink(tempFilePath, (e) => {
+            if (e) {
+                console.log(`WARN: Failed to delete temp file '${tempFilePath}'. Error details: ${e.message}`)
+            }
+        })
+    }
+}
+
+async function uploadMedia(file, numOfFiles) {
     const fileExt = file.name.substr(file.name.lastIndexOf('.'))
-    const fileName = handle + '-' + new Date().getTime()
+    const fileName = file.name + '-' + new Date().getTime()
 
-    const url = await uploadToBucket(file.data, fileName+fileExt, file.mimetype)
+    // upload original file
+    let url = await uploadToBucket(file.data, fileName + fileExt, file.mimetype)
 
     let previewUrl = url
-    if(file.mimetype.includes('image')){
-        const previewData = await createPreviewImage(file.data, numOfFiles)
-        previewUrl = await uploadToBucket(previewData, fileName+'-preview.jpg', 'image/jpeg')
-    }else if(file.mimetype.includes('video')){
-        const previewData = await createThumbnail(url, numOfFiles)
-        previewUrl = await uploadToBucket(previewData, fileName+'-preview.jpg', 'image/jpeg')
+    if (file.mimetype.includes('image')) {
+        const shouldResize = await shouldResizeImage(file.data)
+        if (shouldResize) {
+            // create & upload resized image
+            const resizedData = await createResizedImage(file.data, file.name)
+            url = await uploadToBucket(resizedData, fileName + '-resized.jpg', 'image/jpeg')
+        }
+
+        // create & upload preview image
+        const previewData = await createPreviewImage(file.data, numOfFiles, file.name)
+        previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
+    } else if (file.mimetype.includes('video')) {
+        const previewData = await createThumbnail(url, numOfFiles, fileName)
+        previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
+    }
+    else {
+        throw new Error(`Unsupported mime type '${file.mimetype}'. File name: '${file.name}'.`)
     }
 
     return {
@@ -114,7 +206,7 @@ async function uploadMedia(file, handle, numOfFiles) {
  * @param {Object} payload the event payload
  * @param {Object} options the extra options to the message
  */
-async function postBusEvent (topic, payload, options = {}) {
+async function postBusEvent(topic, payload, options = {}) {
     const client = getBusApiClient()
     const message = {
         topic,
@@ -126,7 +218,14 @@ async function postBusEvent (topic, payload, options = {}) {
     if (options.key) {
         message.key = options.key
     }
-    await client.postEvent(message)
+
+    try {
+        console.log(`INFO: Posting Event using Bus API client. Event message/payload: ${JSON.stringify(message)}`)
+        await client.postEvent(message)
+    } catch (e) {
+        console.log(`ERROR: Failed to post Event using Bus API client. Event message/payload: ${JSON.stringify(message)}`)
+        throw e
+    }
 }
 
 /**
@@ -135,7 +234,7 @@ async function postBusEvent (topic, payload, options = {}) {
  * @param {Array} recipients the array of recipients in { userId || email || handle } format
  * @param {Object} data the data
  */
-async function sendEmail (type, recipients, data) {
+async function sendEmail(type, recipients, data) {
     try {
         const res = await postBusEvent(constants.NOTIFICATIONS_TOPIC, {
             notifications: [
@@ -155,19 +254,26 @@ async function sendEmail (type, recipients, data) {
         })
         return res
     } catch (e) {
-        console.log(`Failed to post notification ${type}: ${e.message}`)
+        e.message = `ERROR: Failed to post '${type}' event to BUS API. Error message: ${e.message}`
+        throw e
     }
 }
 
-async function getEmail(handle){
+async function getEmail(handle) {
     const token = await getM2MToken()
 
-    const response = await axios.get(config.EMAIL.MEMBER_API_BASE_URL+`/members/${handle}`,{
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
-    return response.data.email
+    try {
+        const response = await axios.get(config.EMAIL.MEMBER_API_BASE_URL + `/members/${handle}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        console.log(`Received details from Member API for '${handle}' member: ${JSON.stringify(response)}`)
+        return response.data.email
+    } catch (e) {
+        e.message = `ERROR: Failed to retrieve '${handle}' member details from Member API. Error message: ${e.message}`
+        throw e
+    }
 }
 
 module.exports = {
