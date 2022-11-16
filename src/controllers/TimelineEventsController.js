@@ -1,18 +1,18 @@
 const Joi = require('joi')
-const {handleErrors} = require("../errors/helper");
+const { handleErrors } = require("../errors/helper");
 
 module.exports = class TimelineEventsController {
 
-    constructor(timelineEventsService){
+    constructor(timelineEventsService) {
         this.timelineEventsService = timelineEventsService
 
 
         this.addEventBodySchema = Joi.object({
-            title: Joi.string().required().max(50),
-            description: Joi.string().required().max(500),
+            title: Joi.string().required().max(38),
+            description: Joi.string().required().max(240),
             eventDate: Joi.string().required().custom((value, helper) => {
                 const d = Date.parse(value)
-                if(isNaN(d)){
+                if (isNaN(d)) {
                     return helper.message("Date has incorrect format")
                 }
                 return value
@@ -34,7 +34,7 @@ module.exports = class TimelineEventsController {
         try {
             const events = await this.timelineEventsService.getApprovedEvents()
             res.status(200).json(events)
-        }catch(err){
+        } catch (err) {
             handleErrors(res, err)
         }
     }
@@ -43,12 +43,17 @@ module.exports = class TimelineEventsController {
         try {
             const events = await this.timelineEventsService.getInReviewEvents(req.authUser)
             res.status(200).json(events)
-        }catch(err){
+        } catch (err) {
             handleErrors(res, err)
         }
     }
 
     async addTimelineEvent(req, res) {
+        if (req.shouldAbort) {
+            console.log('Aborting request..')
+            return
+        }
+
         const { body } = req
         const { value: { title, description, eventDate }, error: bodyError } = this.addEventBodySchema.validate(body)
         if (bodyError !== undefined) {
@@ -57,14 +62,14 @@ module.exports = class TimelineEventsController {
         }
 
         let mediaFiles = []
-        if(req.files){
+        if (req.files) {
             mediaFiles = Array.isArray(req.files.mediaFiles) ? req.files.mediaFiles : [req.files.mediaFiles]
         }
 
         try {
             const result = await this.timelineEventsService.addEvent(title, description, eventDate, mediaFiles, req.authUser)
             res.status(200).json(result)
-        }catch(err){
+        } catch (err) {
             handleErrors(res, err)
         }
     }
@@ -77,10 +82,10 @@ module.exports = class TimelineEventsController {
             return
         }
 
-        try{
+        try {
             const result = await this.timelineEventsService.getEventById(event_id)
             res.status(200).json(result)
-        }catch(err){
+        } catch (err) {
             handleErrors(res, err)
         }
     }
@@ -96,7 +101,7 @@ module.exports = class TimelineEventsController {
         try {
             await this.timelineEventsService.deleteEvent(event_id, req.authUser)
             res.sendStatus(200)
-        }catch(err) {
+        } catch (err) {
             handleErrors(res, err)
         }
     }
@@ -112,7 +117,7 @@ module.exports = class TimelineEventsController {
         try {
             await this.timelineEventsService.approveEvent(event_id, req.authUser)
             res.sendStatus(200)
-        }catch(err) {
+        } catch (err) {
             handleErrors(res, err)
         }
     }
@@ -134,7 +139,7 @@ module.exports = class TimelineEventsController {
         try {
             await this.timelineEventsService.rejectEvent(event_id, reason, note, req.authUser)
             res.sendStatus(200)
-        }catch(err) {
+        } catch (err) {
             handleErrors(res, err)
         }
     }

@@ -1,10 +1,10 @@
-const {ForbiddenError, NotFoundError} = require("../errors/custom-errors");
-const {toReducedTimelineEvent, toCompleteTimelineEvent} = require("../models/dto-helpers");
+const { ForbiddenError, NotFoundError } = require("../errors/custom-errors");
+const { toReducedTimelineEvent, toCompleteTimelineEvent } = require("../models/dto-helpers");
 const helper = require('./helpers')
 const constants = require('../../constants')
 
 module.exports = class TimelineEventService {
-    constructor(timelineEventRepository){
+    constructor(timelineEventRepository) {
         this.timelineEventRepository = timelineEventRepository
     }
 
@@ -14,7 +14,7 @@ module.exports = class TimelineEventService {
     }
 
     async getInReviewEvents(authUser) {
-        if(!authUser.isAdmin) {
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can view events in review.')
         }
 
@@ -22,19 +22,28 @@ module.exports = class TimelineEventService {
         return events.map(toReducedTimelineEvent)
     }
 
-    async addEvent(title, description, eventDate, mediaFiles, authUser){
+    async addEvent(title, description, eventDate, mediaFiles, authUser) {
 
         const status = authUser.isAdmin ? 'Approved' : 'InReview'
 
+        console.log(`INFO: uploading media files`)
         const numOfFiles = (mediaFiles || []).length
-        const fileUrlsPromise = mediaFiles.map(async file => helper.uploadMedia(file, authUser.handle, numOfFiles))
-        const fileUrls = await Promise.all(fileUrlsPromise)
+        let fileUrls = []
+        for (var i = 0; i < numOfFiles; i++) {
+            const file = mediaFiles[i]
+            console.log(`INFO: Uploading file #${i + 1}: ${file.name}`)
+            const url = await helper.uploadMedia(file, numOfFiles)
+            fileUrls.push(url)
+            console.log(`INFO: File #${i + 1} uploaded, url: ${url}`)
+        }
 
+        console.log(`INFO: Saving the Event to Database`)
         const result = await this.timelineEventRepository.addEvent(title, description, eventDate, fileUrls, status, authUser.handle)
 
         const completeTimelineEvent = toCompleteTimelineEvent(result)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_CREATED, [{email: authUser.email}],
+        console.log(`INFO: Sending the email`)
+        await helper.sendEmail(constants.NotificationTypes.EVENT_CREATED, [{ email: /*authUser.email*/ 'i.s.goroshko@gmail.com' }],
             completeTimelineEvent)
 
         return completeTimelineEvent
@@ -45,7 +54,7 @@ module.exports = class TimelineEventService {
     }
 
     async deleteEvent(event_id, authUser) {
-        if(!authUser.isAdmin){
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can delete events.')
         }
 
@@ -53,12 +62,12 @@ module.exports = class TimelineEventService {
     }
 
     async approveEvent(event_id, authUser) {
-        if(!authUser.isAdmin){
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can approve events.')
         }
 
         const eventToApprove = await this.getEventById(event_id)
-        if(eventToApprove.status !== 'InReview'){
+        if (eventToApprove.status !== 'InReview') {
             throw new NotFoundError(`Event with id ${event_id} is not under review`)
         }
 
@@ -68,31 +77,32 @@ module.exports = class TimelineEventService {
 
         const email = await helper.getEmail(completeEvent.createdBy)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_APPROVED, [{email}],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_APPROVED, [{ email }],
             completeEvent)
     }
 
     async rejectEvent(event_id, reason, note, authUser) {
-        if(!authUser.isAdmin){
+        if (!authUser.isAdmin) {
             throw new ForbiddenError('Only admin users can reject events.')
         }
 
         const eventToReject = await this.getEventById(event_id)
-        if(eventToReject.status !== 'InReview'){
+        if (eventToReject.status !== 'InReview') {
             throw new NotFoundError(`Event with id ${event_id} is not under review`)
         }
 
-        const result = await this.timelineEventRepository.rejectEvent(event_id,reason, note, authUser.handle)
+        const result = await this.timelineEventRepository.rejectEvent(event_id, reason, note, authUser.handle)
 
         const completeEvent = toCompleteTimelineEvent(result)
 
         let email = await helper.getEmail(completeEvent.createdBy)
 
+        // TODO: remove once code is working fine
         if (!email) {
-            email = "mess@gmail.com"
+            email = "i.s.goroshko88@gmail.com"
         }
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{email}],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{ email }],
             completeEvent)
     }
 }
