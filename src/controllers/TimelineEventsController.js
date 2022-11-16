@@ -49,6 +49,11 @@ module.exports = class TimelineEventsController {
     }
 
     async addTimelineEvent(req, res) {
+        if (req.shouldAbort) {
+            console.log('Aborting request..')
+            return
+        }
+
         const { body } = req
         const { value: { title, description, eventDate }, error: bodyError } = this.addEventBodySchema.validate(body)
         if (bodyError !== undefined) {

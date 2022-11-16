@@ -1,3 +1,10 @@
+class BadRequestError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'Bad Request'
+    }
+}
+
 class NotFoundError extends Error {
     constructor(message) {
         super(message)
@@ -13,6 +20,7 @@ class ForbiddenError extends Error {
 }
 
 module.exports = {
+    BadRequestError,
     NotFoundError,
-    ForbiddenError,
+    ForbiddenError
 }

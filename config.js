@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 module.exports = {
+    IS_DEV: true,
     SERVER_PORT: process.env.SERVER_PORT || 3001,
     API_PREFIX: '/v5/timeline-wall',
 
@@ -31,9 +32,9 @@ module.exports = {
         EMAIL_FROM: process.env.EMAIL_FROM || 'no-reply@topcoder.com',
         MEMBER_API_BASE_URL: process.env.MEMBER_API_BASE_URL || 'https://api.topcoder-dev.com/v5',
         SENDGRID_TEMPLATES: {
-            EVENT_APPROVED: process.env.EVENT_APPROVED_TEMPLATE_ID || '',
-            EVENT_REJECTED: process.env.EVENT_REJECTED_TEMPLATE_ID || '',
-            EVENT_CREATED: process.env.EVENT_CREATED_TEMPLATE_ID || ''
+            EVENT_APPROVED: process.env.EVENT_APPROVED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49',
+            EVENT_REJECTED: process.env.EVENT_REJECTED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49',
+            EVENT_CREATED: process.env.EVENT_CREATED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49'
         }
     },
 
@@ -47,8 +48,10 @@ module.exports = {
     BUSAPI_URL: process.env.BUSAPI_URL || 'https://api.topcoder-dev.com/v5',
     KAFKA_ERROR_TOPIC: process.env.KAFKA_ERROR_TOPIC || 'common.error.reporting',
 
+    RESIZED_IMAGE_MAX_WIDTH: parseInt(process.env.RESIZED_IMAGE_MAX_WIDTH) || 1920,
+    RESIZED_IMAGE_MAX_HEIGHT: parseInt(process.env.RESIZED_IMAGE_MAX_HEIGHT) || 1080,
     PREVIEW_MAX_WIDTH: parseInt(process.env.PREVIEW_WIDTH) || 600,
     PREVIEW_MAX_HEIGHT: parseInt(process.env.PREVIEW_HEIGHT) || 200,
-    MEDIA_SIZE_LIMIT: parseInt(process.env.MEDIA_SIZE_LIMIT) || undefined,
+    MEDIA_SIZE_LIMIT: parseInt(process.env.MEDIA_SIZE_LIMIT) || 150 * 1024 * 1024, // 100 MB by default
     HEALTH_CHECK_TIMEOUT: parseInt(process.env.HEALTH_CHECK_TIMEOUT) || 3000,
 }

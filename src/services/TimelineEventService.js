@@ -26,15 +26,24 @@ module.exports = class TimelineEventService {
 
         const status = authUser.isAdmin ? 'Approved' : 'InReview'
 
+        console.log(`INFO: uploading media files`)
         const numOfFiles = (mediaFiles || []).length
-        const fileUrlsPromise = mediaFiles.map(async file => helper.uploadMedia(file, authUser.handle, numOfFiles))
-        const fileUrls = await Promise.all(fileUrlsPromise)
+        let fileUrls = []
+        for (var i = 0; i < numOfFiles; i++) {
+            const file = mediaFiles[i]
+            console.log(`INFO: Uploading file #${i + 1}: ${file.name}`)
+            const url = await helper.uploadMedia(file, numOfFiles)
+            fileUrls.push(url)
+            console.log(`INFO: File #${i + 1} uploaded, url: ${url}`)
+        }
 
+        console.log(`INFO: Saving the Event to Database`)
         const result = await this.timelineEventRepository.addEvent(title, description, eventDate, fileUrls, status, authUser.handle)
 
         const completeTimelineEvent = toCompleteTimelineEvent(result)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_CREATED, [{ email: authUser.email }],
+        console.log(`INFO: Sending the email`)
+        await helper.sendEmail(constants.NotificationTypes.EVENT_CREATED, [{ email: /*authUser.email*/ 'i.s.goroshko@gmail.com' }],
             completeTimelineEvent)
 
         return completeTimelineEvent
@@ -88,8 +97,9 @@ module.exports = class TimelineEventService {
 
         let email = await helper.getEmail(completeEvent.createdBy)
 
+        // TODO: remove once code is working fine
         if (!email) {
-            email = "mess@gmail.com"
+            email = "i.s.goroshko88@gmail.com"
         }
 
         await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{ email }],
