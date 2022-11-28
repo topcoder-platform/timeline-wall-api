@@ -263,12 +263,12 @@ async function getEmail(handle) {
     const token = await getM2MToken()
 
     try {
-        const response = await axios.get(config.EMAIL.MEMBER_API_BASE_URL + `/members/${handle}`, {
+        const response = await axios.get(config.EMAIL.MEMBER_API_BASE_URL + `/members/${handle}?fields=email`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
-        console.log(`Received details from Member API for '${handle}' member: ${JSON.stringify(response)}`)
+        console.log(`Received email from Member API for '${handle}' member: ${response.data.email}`)
         return response.data.email
     } catch (e) {
         e.message = `ERROR: Failed to retrieve '${handle}' member details from Member API. Error message: ${e.message}`
