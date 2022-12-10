@@ -77,7 +77,7 @@ module.exports = class TimelineEventService {
 
         const email = await helper.getEmail(completeEvent.createdBy)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_APPROVED, [{ email }],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_APPROVED, [{ email: /*email*/ 'i.s.goroshko@gmail.com' }],
             completeEvent)
     }
 
@@ -97,7 +97,7 @@ module.exports = class TimelineEventService {
 
         let email = await helper.getEmail(completeEvent.createdBy)
 
-        await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{ email }],
+        await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{ email: /*email */ 'i.s.goroshko@gmail.com' }],
             completeEvent)
     }
 }
