@@ -32,9 +32,9 @@ module.exports = {
         EMAIL_FROM: process.env.EMAIL_FROM || 'no-reply@topcoder.com',
         MEMBER_API_BASE_URL: process.env.MEMBER_API_BASE_URL || 'https://api.topcoder-dev.com/v5',
         SENDGRID_TEMPLATES: {
-            EVENT_APPROVED: process.env.EVENT_APPROVED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49',
-            EVENT_REJECTED: process.env.EVENT_REJECTED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49',
-            EVENT_CREATED: process.env.EVENT_CREATED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49'
+            EVENT_CREATED: process.env.EVENT_CREATED_TEMPLATE_ID || 'd-7d28f33a3eb24c239e8b23e10c15f995',
+            EVENT_APPROVED: process.env.EVENT_APPROVED_TEMPLATE_ID || 'd-849951f61262499fbc74f8498c2535a8',
+            EVENT_REJECTED: process.env.EVENT_REJECTED_TEMPLATE_ID || 'd-4228b04a65594a66b15a436537e777f9'
         }
     },
 

@@ -97,11 +97,6 @@ module.exports = class TimelineEventService {
 
         let email = await helper.getEmail(completeEvent.createdBy)
 
-        // TODO: remove once code is working fine
-        if (!email) {
-            email = "i.s.goroshko88@gmail.com"
-        }
-
         await helper.sendEmail(constants.NotificationTypes.EVENT_REJECTED, [{ email }],
             completeEvent)
     }
