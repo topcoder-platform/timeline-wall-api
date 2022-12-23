@@ -36,7 +36,6 @@ DB_PORT=
 BUSAPI_URL=
 EVENT_APPROVED_TEMPLATE_ID=
 EVENT_REJECTED_TEMPLATE_ID=
-EVENT_CREATED_TEMPLATE_ID=
 MEMBER_API_BASE_URL=
 EMAIL_FROM=
 
@@ -75,7 +74,6 @@ MEDIA_SIZE_LIMIT=
 - BUSAPI_URL the url of the BUS API
 - EVENT_APPROVED_TEMPLATE_ID the sendgrid template id for approved event email
 - EVENT_REJECTED_TEMPLATE_ID the sendgrid template id for rejected event email
-- EVENT_CREATED_TEMPLATE_ID the sendgrid template id for created event email
 - MEMBER_API_BASE_URL the base url for the member api
 - EMAIL_FROM the email use as sender
 - AUTH0_URL the auth0 url for the bus api
@@ -120,7 +118,6 @@ Once the templates are loaded into sendgrid, you must set the templates ID in .e
 ```bash
 EVENT_APPROVED_TEMPLATE_ID=
 EVENT_REJECTED_TEMPLATE_ID=
-EVENT_CREATED_TEMPLATE_ID=
 ```
 
 You can also set up the notification types strings from /constants.js.

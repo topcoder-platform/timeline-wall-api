@@ -8,7 +8,6 @@ const EVENT_MIME_TYPE = 'application/json'
 const NotificationTypes = {
     EVENT_APPROVED: 'timeline.notifications.event-approve',
     EVENT_REJECTED: 'timeline.notifications.event-rejected',
-    EVENT_CREATED: 'timeline.notifications.event-created',
 }
 
 const NotificationSettings = {
@@ -18,10 +17,6 @@ const NotificationSettings = {
     },
     [NotificationTypes.EVENT_REJECTED]: {
         sendgridTemplateId: config.EMAIL.SENDGRID_TEMPLATES.EVENT_REJECTED,
-        cc: []
-    },
-    [NotificationTypes.EVENT_CREATED]: {
-        sendgridTemplateId: config.EMAIL.SENDGRID_TEMPLATES.EVENT_CREATED,
         cc: []
     },
 }
