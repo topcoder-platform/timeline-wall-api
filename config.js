@@ -32,9 +32,8 @@ module.exports = {
         EMAIL_FROM: process.env.EMAIL_FROM || 'no-reply@topcoder.com',
         MEMBER_API_BASE_URL: process.env.MEMBER_API_BASE_URL || 'https://api.topcoder-dev.com/v5',
         SENDGRID_TEMPLATES: {
-            EVENT_APPROVED: process.env.EVENT_APPROVED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49',
-            EVENT_REJECTED: process.env.EVENT_REJECTED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49',
-            EVENT_CREATED: process.env.EVENT_CREATED_TEMPLATE_ID || 'd-d9318c8274bd4081827fb2cbd243fa49'
+            EVENT_APPROVED: process.env.EVENT_APPROVED_TEMPLATE_ID || 'd-849951f61262499fbc74f8498c2535a8',
+            EVENT_REJECTED: process.env.EVENT_REJECTED_TEMPLATE_ID || 'd-4228b04a65594a66b15a436537e777f9'
         }
     },
 
@@ -52,6 +51,6 @@ module.exports = {
     RESIZED_IMAGE_MAX_HEIGHT: parseInt(process.env.RESIZED_IMAGE_MAX_HEIGHT) || 1080,
     PREVIEW_MAX_WIDTH: parseInt(process.env.PREVIEW_WIDTH) || 600,
     PREVIEW_MAX_HEIGHT: parseInt(process.env.PREVIEW_HEIGHT) || 200,
-    MEDIA_SIZE_LIMIT: parseInt(process.env.MEDIA_SIZE_LIMIT) || 150 * 1024 * 1024, // 100 MB by default
+    MEDIA_SIZE_LIMIT: parseInt(process.env.MEDIA_SIZE_LIMIT) || 150 * 1024 * 1024, // 150 MB by default
     HEALTH_CHECK_TIMEOUT: parseInt(process.env.HEALTH_CHECK_TIMEOUT) || 3000,
 }
