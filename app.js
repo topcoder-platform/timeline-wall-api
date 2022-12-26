@@ -20,7 +20,7 @@ app.use(fileUpload({
         fileSize: config.MEDIA_SIZE_LIMIT
     },
     limitHandler: (req, res) => {
-        const errorMessage = `File size exceeded limit of ${config.MEDIA_SIZE_LIMIT / 1024 / 1024} MB.`
+        const errorMessage = `Your file size exceeds ${config.MEDIA_SIZE_LIMIT / 1024 / 1024}MB. Please try again with a smaller file.`
         res.status(400).json({ message: errorMessage })
         // the below line is used to check this property in controller.
         // The reason is that lib doesn't stop execution after custom limitHandler
