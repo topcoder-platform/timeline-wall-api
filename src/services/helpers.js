@@ -77,7 +77,7 @@ async function uploadToBucket(data, fileName, mimetype) {
         Key: fileName,
         Body: data,
         ContentType: mimetype,
-        ACL: 'public-read',
+        // ACL: 'public-read',
         Metadata: {
             fileName
         }
