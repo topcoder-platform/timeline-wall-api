@@ -10,7 +10,7 @@ module.exports = {
 
     ADMIN_USERS: (process.env.ADMIN_USERS || 'TCConnCopilot').split(' ') || [],
 
-    PHOTO_URL_TEMPLATE: process.env.PHOTO_URL_TEMPLATE || 'https://tc-timelline-wall-bucket.s3.amazonaws.com/<key>' || 'http://localhost:9000/fileuploads/<key>',
+    PHOTO_URL_TEMPLATE: process.env.PHOTO_URL_TEMPLATE || 'https://timewall.topcoder-dev.com/<key>' || 'http://localhost:9000/fileuploads/<key>',
 
     AMAZON: {
         IS_LOCAL: process.env.IS_LOCAL_DB,
