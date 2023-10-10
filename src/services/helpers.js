@@ -187,8 +187,9 @@ async function uploadMedia(file, numOfFiles) {
         const previewData = await createPreviewImage(file.data, numOfFiles, file.name)
         previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
     } else if (file.mimetype.includes('video')) {
-        const previewData = await createThumbnail(url, numOfFiles, fileName)
-        previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
+        // this is not working anylonger after local file access was restricted on EC2 instances
+        // const previewData = await createThumbnail(url, numOfFiles, fileName)
+        // previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
     }
     else {
         throw new Error(`Unsupported mime type '${file.mimetype}'. File name: '${file.name}'.`)
