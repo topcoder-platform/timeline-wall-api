@@ -26,6 +26,7 @@ module.exports = {
         HOST: process.env.DB_HOST || 'localhost',
         NAME: process.env.DB_NAME || 'topcoder-timeline',
         PORT: parseInt(process.env.DB_PORT) || 5432,
+        SCHEMA: process.env.DB_SCHEMA_NAME || 'Timeline'
     },
 
     EMAIL: {
