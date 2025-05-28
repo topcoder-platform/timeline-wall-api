@@ -3,7 +3,7 @@ const config = require('../../config')
 let pool
 
 function getPool() {
-    let options = "-c search_path=" + config.DATABASE.DB_SCHEMA_NAME
+    let options = "-c search_path=" + config.DATABASE.SCHEMA
     if (!pool) {
         pool = new Pool({
             user: config.DATABASE.USER,
