@@ -1,19 +1,19 @@
 const { getPool } = require("./repositories/db-helper");
 const config = require("../config")
-express = require('express')
-TimelineEventsController = require('./controllers/TimelineEventsController')
-TimelineEventsService = require('./services/TimelineEventService')
-TimelineEventsRepository = require('./repositories/TimelineEventsRepository')
+const express = require('express')
+const TimelineEventsController = require('./controllers/TimelineEventsController')
+const TimelineEventsService = require('./services/TimelineEventService')
+const TimelineEventsRepository = require('./repositories/TimelineEventsRepository')
 
-AuthController = require('./controllers/AuthController')
-HealthController = require('./controllers/HealthController')
+const AuthController = require('./controllers/AuthController')
+const HealthController = require('./controllers/HealthController')
 
-timelineEventsRepository = new TimelineEventsRepository(getPool())
-timelineEventsService = new TimelineEventsService(timelineEventsRepository)
-timelineEventsController = new TimelineEventsController(timelineEventsService)
+const timelineEventsRepository = new TimelineEventsRepository(getPool())
+const timelineEventsService = new TimelineEventsService(timelineEventsRepository)
+const timelineEventsController = new TimelineEventsController(timelineEventsService)
 
-authController = new AuthController()
-healthController = new HealthController()
+const authController = new AuthController()
+const healthController = new HealthController()
 
 module.exports = {
     [`${config.API_PREFIX}/timeLineEvents`]: {

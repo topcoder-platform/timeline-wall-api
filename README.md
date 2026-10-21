@@ -39,12 +39,14 @@ EVENT_REJECTED_TEMPLATE_ID=
 MEMBER_API_BASE_URL=
 EMAIL_FROM=
 
-# Auth0 info (for accessing member api)
-AUTH0_URL=
-AUTH0_AUDIENCE=
-TOKEN_CACHE_TIME=
-AUTH0_CLIENT_ID=
-AUTH0_CLIENT_SECRET=
+# Keycloak outbound service credentials
+M2M_PROVIDER=
+KEYCLOAK_ISSUER=
+KEYCLOAK_AUDIENCE=
+KEYCLOAK_TOKEN_URL=
+KEYCLOAK_CLIENT_ID=
+KEYCLOAK_CLIENT_SECRET=
+KEYCLOAK_SCOPE=
 
 # Kafka error topic for bus API
 KAFKA_ERROR_TOPIC=
@@ -58,7 +60,7 @@ MEDIA_SIZE_LIMIT=
 ```
 - SERVER_PORT the port used by the server
 - AUTH_SECRET the authentication secret for token verification
-- VALID_ISSUERS the (space separated) list of valid issuers for the auth token
+- VALID_ISSUERS the JSON array of trusted member issuers for the auth token
 - ADMIN_USERS the (space separated) list of handles of admin users
 - PHOTO_URL_TEMPLATE the url template for media uploaded to AWS. the file name will replace <key>
 - S3_API_VERSION api version for S3 bucket
@@ -76,11 +78,6 @@ MEDIA_SIZE_LIMIT=
 - EVENT_REJECTED_TEMPLATE_ID the sendgrid template id for rejected event email
 - MEMBER_API_BASE_URL the base url for the member api
 - EMAIL_FROM the email use as sender
-- AUTH0_URL the auth0 url for the bus api
-- AUTH0_AUDIENCE used by the bus api
-- TOKEN_CACHE_TIME used by the bus api
-- AUTH0_CLIENT_ID used by the bus api
-- AUTH0_CLIENT_SECRET used y the bus api
 - KAFKA_ERROR_TOPIC used by the bus api
 - PREVIEW_MAX_WIDTH the max width of preview images
 - PREVIEW_MAX_HEIGHT the max height of preview images
@@ -135,3 +132,31 @@ The base url is by default localhost:3000. You can change it also in the postman
 
 
 
+
+## Keycloak migration branch
+
+`keycloak_m2M` pins shared core 4.0.0-keycloak.0 at
+`c262f4aca971904f308085bdeaaed35cdf3cfa7d`, including the Bus wrapper. Run
+`nvm use` (Node 22.23.2). Configure `M2M_PROVIDER=keycloak`, the HTTPS realm
+issuer, audience, managed HTTPS token URL, and dedicated client ID/secret.
+`KEYCLOAK_SCOPE` optionally requests granted scopes. Outbound Member reads and
+Bus notifications require `read:members` and `write:bus_api` respectively.
+Shared core verifies and caches service tokens; Auth0 issuance/proxy fallback
+and the old DEV client-secret console logging are removed.
+
+Timeline's protected routes are member-only: a verified service token receives
+403. Public reads remain public. Member claims are normalized by shared core;
+`ADMIN_USERS` still determines the administrator flag. Configure `AUTH_SECRET`,
+`VALID_ISSUERS` as a JSON array and `AUTH_USER_AUDIENCES` as a JSON array (or
+explicit `ALLOW_LEGACY_USER_AUDIENCE=true`) for member session compatibility.
+
+The original branch omitted the required `config` module. This branch supplies
+`config.js` using environment settings only. Defaults are port 3001, empty API
+prefix, PostgreSQL schema `public`, preview 600×400 and resized images 1920×1080.
+Set `API_PREFIX`, `DB_SCHEMA`, `PREVIEW_MAX_WIDTH/HEIGHT`,
+`RESIZED_IMAGE_MAX_WIDTH/HEIGHT` to the workload's current values before rollout.
+AWS credentials use the normal SDK chain when explicit keys are absent; local
+S3 can use `IS_LOCAL=true` and `S3_ENDPOINT`. No secrets have embedded defaults.
+
+`npm run lint`, `npm run build` (JavaScript syntax checks) and `npm test`
+validate this branch. CI excludes the migration branch; no service is deployed.

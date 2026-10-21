@@ -2,13 +2,13 @@ const { getPool } = require("../repositories/db-helper");
 const config = require("../../config");
 const {handleErrors} = require("../errors/helper");
 
-TimelineEventsService = require('../services/TimelineEventService')
-TimelineEventsRepository = require('../repositories/TimelineEventsRepository')
+const TimelineEventsService = require('../services/TimelineEventService')
+const TimelineEventsRepository = require('../repositories/TimelineEventsRepository')
 
 let checksRun = 0
 
-timelineEventsRepository =  new TimelineEventsRepository(getPool())
-timelineEventsService = new TimelineEventsService(timelineEventsRepository)
+const timelineEventsRepository =  new TimelineEventsRepository(getPool())
+const timelineEventsService = new TimelineEventsService(timelineEventsRepository)
 
 module.exports = class HealthController {
   async checkHealth(req, res) {

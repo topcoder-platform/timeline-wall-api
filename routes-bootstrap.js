@@ -1,21 +1,16 @@
 const routes = require('./src/routes')
-const _ = require('lodash')
-const config = require("./config")
-const authenticator = require('tc-core-library-js').middleware.jwtAuthenticator
+const { authenticateMember } = require('./src/auth')
 
-
+/** Register public reads and member-only Timeline operations.
+ * @param {Object} app Express app to receive the routes.
+ * @returns {void} Installs route handlers; authentication responds with 401/403.
+ * @throws Express errors for invalid route definitions.
+ */
 module.exports = (app) => {
-    _.each(routes, (verbs, path) => {
-        _.each(verbs, (route, verb) => {
-
-            if(route.auth){
-                app[verb](path, authenticator({ AUTH_SECRET: config.AUTH_SECRET, VALID_ISSUERS: config.VALID_ISSUERS }))
-                app[verb](path, (req, res, next) => {
-                    req.authUser.isAdmin = config.ADMIN_USERS.includes(req.authUser.handle)
-                    next()
-                })
-            }
-            app[verb](path, route.method)
-        })
-    })
+  for (const [path, verbs] of Object.entries(routes)) {
+    for (const [verb, route] of Object.entries(verbs)) {
+      if (route.auth) app[verb](path, authenticateMember)
+      app[verb](path, route.method)
+    }
+  }
 }

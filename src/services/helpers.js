@@ -8,7 +8,7 @@ const genThumbnail = require('simple-thumbnail')
 const sharp = require('sharp')
 const busApi = require('topcoder-bus-api-wrapper')
 const m2mAuth = require('tc-core-library-js').auth.m2m
-const m2m = m2mAuth(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME']))
+const m2m = m2mAuth(config)
 
 
 const constants = require('../../constants')
@@ -33,17 +33,23 @@ const s3 = new AWS.S3()
 let busApiClient
 
 /**
- * Get Bus API Client, instantiate it if it doesn't exist
- * @return {Object} Bus API Client Instance
+ * Get a persistent Bus wrapper using Keycloak settings (no arguments).
+ * @return {Object} Bus API client with the pinned shared-core provider.
+ * @throws {Error} Invalid wrapper configuration before any publication.
  */
 function getBusApiClient() {
     try {
         // if there is no bus API client instance, then create a new instance
         if (!busApiClient) {
-            busApiClient = busApi(_.pick(config,
-                ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME',
-                    'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET', 'BUSAPI_URL',
-                    'KAFKA_ERROR_TOPIC', 'AUTH0_PROXY_SERVER_URL']))
+            // Wrapper option names are legacy; values come exclusively from Keycloak.
+            busApiClient = busApi({
+                AUTH0_URL: config.KEYCLOAK_TOKEN_URL,
+                AUTH0_AUDIENCE: config.KEYCLOAK_AUDIENCE,
+                AUTH0_CLIENT_ID: config.KEYCLOAK_CLIENT_ID,
+                AUTH0_CLIENT_SECRET: config.KEYCLOAK_CLIENT_SECRET,
+                BUSAPI_URL: config.BUSAPI_URL,
+                KAFKA_ERROR_TOPIC: config.KAFKA_ERROR_TOPIC
+            })
         }
         return busApiClient
     } catch (e) {
@@ -52,22 +58,12 @@ function getBusApiClient() {
     }
 }
 
-/**
- * Get M2M token.
- * @returns {Promise<String>} the M2M token
+/** Obtain a verified cached Keycloak service token (no arguments).
+ * @returns {Promise<string>} Shared-core RS256 token for outbound Member calls.
+ * @throws {Error} Sanitized issuance/validation failures; credentials are never logged.
  */
 async function getM2MToken() {
-    try {
-        // TODO: remove code below
-        if (config.IS_DEV) {
-            console.log(`${config.AUTH0_CLIENT_ID}|${config.AUTH0_CLIENT_SECRET}`)
-        }
-        const res = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
-        return res
-    } catch (e) {
-        e.message = `ERROR: Failed to retrieve M2M token. Error message: ${e.message}`
-        throw e
-    }
+    return m2m.getMachineToken()
 }
 
 
@@ -88,7 +84,7 @@ async function uploadToBucket(data, fileName, mimetype) {
         // Upload to S3
         await s3.upload(params).promise()
     } catch (e) {
-        e.message = `ERROR: Failed to upload file '${fileName + fileExt}' to S3 Bucket. Error message: ${e.message}`
+        e.message = `ERROR: Failed to upload file '${fileName}' to S3 Bucket. Error message: ${e.message}`
         throw e
     }
 
