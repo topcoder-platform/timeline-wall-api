@@ -1,6 +1,8 @@
 /** Environment-only runtime configuration used by routes, auth and integrations.
- * Load local .env values when present; shared core rejects incomplete Keycloak
- * settings at startup. Secrets have no hardcoded defaults.
+ * Load local .env values when present. USE_KEYCLOAK selects the M2M provider
+ * (read by tc-core-library-js auth.useKeycloak): "true" uses the KEYCLOAK_* settings,
+ * which shared core rejects at startup when incomplete; unset or "false" uses the
+ * AUTH0_* settings, as before the Keycloak migration. Secrets have no hardcoded defaults.
  */
 require('dotenv').config()
 const env = process.env
@@ -10,7 +12,13 @@ module.exports = {
   AUTH_SECRET: env.AUTH_SECRET,
   VALID_ISSUERS: env.VALID_ISSUERS || '[]',
   ADMIN_USERS: (env.ADMIN_USERS || '').split(/\s+/).filter(Boolean),
-  M2M_PROVIDER: env.M2M_PROVIDER,
+  USE_KEYCLOAK: env.USE_KEYCLOAK,
+  AUTH0_URL: env.AUTH0_URL,
+  AUTH0_AUDIENCE: env.AUTH0_AUDIENCE,
+  TOKEN_CACHE_TIME: env.TOKEN_CACHE_TIME,
+  AUTH0_CLIENT_ID: env.AUTH0_CLIENT_ID,
+  AUTH0_CLIENT_SECRET: env.AUTH0_CLIENT_SECRET,
+  AUTH0_PROXY_SERVER_URL: env.AUTH0_PROXY_SERVER_URL,
   KEYCLOAK_ISSUER: env.KEYCLOAK_ISSUER,
   KEYCLOAK_AUDIENCE: env.KEYCLOAK_AUDIENCE,
   KEYCLOAK_TOKEN_URL: env.KEYCLOAK_TOKEN_URL,

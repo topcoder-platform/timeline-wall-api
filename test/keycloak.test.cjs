@@ -4,7 +4,7 @@ const { test } = require('node:test')
 const nock = require('nock')
 const issuer = 'https://timeline.test/realms/m2m'
 Object.assign(process.env, {
-  M2M_PROVIDER: 'keycloak', KEYCLOAK_ISSUER: issuer,
+  USE_KEYCLOAK: 'true', KEYCLOAK_ISSUER: issuer,
   KEYCLOAK_AUDIENCE: 'https://api.test', KEYCLOAK_TOKEN_URL: 'https://timeline.test/m2m/token',
   KEYCLOAK_CLIENT_ID: 'timeline-test', KEYCLOAK_CLIENT_SECRET: 'synthetic-secret',
   KEYCLOAK_SCOPE: 'read:members write:bus_api', AUTH_SECRET: 'synthetic-member-secret',
@@ -56,7 +56,7 @@ test('Member lookup verifies returned credentials and caches successful tokens',
 test('Bus wrapper uses the pinned shared provider and never falls back to Auth0', async () => {
   const { createRequire } = require('node:module')
   const wrapperRequire = createRequire(require.resolve('topcoder-bus-api-wrapper'))
-  assert.equal(wrapperRequire('tc-core-library-js/package.json').version, '4.0.0-keycloak.0')
+  assert.equal(wrapperRequire('tc-core-library-js/package.json').version, '4.0.0-keycloak.1')
   const { sendEmail } = require('../src/services/helpers')
   const { NotificationTypes } = require('../constants')
   const jwt = token(); const endpoint = nock('https://timeline.test').post('/m2m/token').reply(200, { access_token: jwt, expires_in: 900 })

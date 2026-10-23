@@ -7,8 +7,12 @@ const fs = require('fs')
 const genThumbnail = require('simple-thumbnail')
 const sharp = require('sharp')
 const busApi = require('topcoder-bus-api-wrapper')
-const m2mAuth = require('tc-core-library-js').auth.m2m
-const m2m = m2mAuth(config)
+const { auth } = require('tc-core-library-js')
+const m2mAuth = auth.m2m
+// Member lookups: Keycloak (KEYCLOAK_*) when config.USE_KEYCLOAK is true; otherwise Auth0
+// with AUTH0_URL/AUTH0_AUDIENCE, requested from AUTH0_URL directly because the
+// pre-Keycloak code never sent these through AUTH0_PROXY_SERVER_URL (only the Bus did).
+const m2m = m2mAuth({ ...config, AUTH0_PROXY_SERVER_URL: config.AUTH0_URL })
 
 
 const constants = require('../../constants')
@@ -33,7 +37,11 @@ const s3 = new AWS.S3()
 let busApiClient
 
 /**
- * Get a persistent Bus wrapper using Keycloak settings (no arguments).
+ * Get a persistent Bus wrapper for the provider USE_KEYCLOAK selects (no arguments).
+ * Its AUTH0_* option names carry KEYCLOAK_TOKEN_URL/AUDIENCE/CLIENT_ID/SECRET when
+ * USE_KEYCLOAK is true, otherwise AUTH0_URL, AUTH0_AUDIENCE, AUTH0_PROXY_SERVER_URL,
+ * AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET (with TOKEN_CACHE_TIME), as before the
+ * migration. Used by sendEmail to publish notification events.
  * @return {Object} Bus API client with the pinned shared-core provider.
  * @throws {Error} Invalid wrapper configuration before any publication.
  */
@@ -41,12 +49,10 @@ function getBusApiClient() {
     try {
         // if there is no bus API client instance, then create a new instance
         if (!busApiClient) {
-            // Wrapper option names are legacy; values come exclusively from Keycloak.
+            // Wrapper option names are legacy; auth.wrapperSettings fills them for the active provider.
             busApiClient = busApi({
-                AUTH0_URL: config.KEYCLOAK_TOKEN_URL,
-                AUTH0_AUDIENCE: config.KEYCLOAK_AUDIENCE,
-                AUTH0_CLIENT_ID: config.KEYCLOAK_CLIENT_ID,
-                AUTH0_CLIENT_SECRET: config.KEYCLOAK_CLIENT_SECRET,
+                ...auth.wrapperSettings(config),
+                TOKEN_CACHE_TIME: config.TOKEN_CACHE_TIME,
                 BUSAPI_URL: config.BUSAPI_URL,
                 KAFKA_ERROR_TOPIC: config.KAFKA_ERROR_TOPIC
             })
@@ -58,8 +64,11 @@ function getBusApiClient() {
     }
 }
 
-/** Obtain a verified cached Keycloak service token (no arguments).
- * @returns {Promise<string>} Shared-core RS256 token for outbound Member calls.
+/** Obtain a cached M2M token from the provider USE_KEYCLOAK selects (no arguments).
+ * With USE_KEYCLOAK=true it is a verified RS256 Keycloak token for KEYCLOAK_CLIENT_ID/
+ * KEYCLOAK_CLIENT_SECRET (optional KEYCLOAK_SCOPE); otherwise an Auth0 token for
+ * AUTH0_CLIENT_ID/AUTH0_CLIENT_SECRET. Used by getEmail for outbound Member calls.
+ * @returns {Promise<string>} Shared-core token for outbound Member calls.
  * @throws {Error} Sanitized issuance/validation failures; credentials are never logged.
  */
 async function getM2MToken() {
