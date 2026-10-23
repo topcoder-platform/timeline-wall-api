@@ -56,7 +56,7 @@ test('Member lookup verifies returned credentials and caches successful tokens',
 test('Bus wrapper uses the pinned shared provider and never falls back to Auth0', async () => {
   const { createRequire } = require('node:module')
   const wrapperRequire = createRequire(require.resolve('topcoder-bus-api-wrapper'))
-  assert.equal(wrapperRequire('tc-core-library-js/package.json').version, '4.0.0-keycloak.1')
+  assert.equal(wrapperRequire('tc-core-library-js/package.json').version, '4.0.0-keycloak.2')
   const { sendEmail } = require('../src/services/helpers')
   const { NotificationTypes } = require('../constants')
   const jwt = token(); const endpoint = nock('https://timeline.test').post('/m2m/token').reply(200, { access_token: jwt, expires_in: 900 })

@@ -27,7 +27,7 @@
     "pg": "^8.8.0",
     "sharp": "^0.31.0",
     "simple-thumbnail": "^1.6.5",
-    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/e844764e1c2cadcc01fd5e05029590319802af09",
+    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/112d54a3ed66423e7305e94e174937823e76124e",
     "topcoder-bus-api-wrapper": "topcoder-platform/tc-bus-api-wrapper.git"
   },
   "devDependencies": {

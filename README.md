@@ -152,8 +152,8 @@ The base url is by default localhost:3000. You can change it also in the postman
 
 ## Keycloak migration branch
 
-`keycloak_m2M` pins shared core 4.0.0-keycloak.1 at
-`e844764e1c2cadcc01fd5e05029590319802af09`, including the Bus wrapper (through the
+`keycloak_m2M` pins shared core 4.0.0-keycloak.2 at
+`112d54a3ed66423e7305e94e174937823e76124e`, including the Bus wrapper (through the
 `overrides` entry in `package.json`). Run `nvm use` (Node 22.23.2). The old DEV
 client-secret console logging is removed.
 
