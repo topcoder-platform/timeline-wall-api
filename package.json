@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test test/*.test.cjs",
     "dev": "nodemon run start",
     "start": "node app.js"
   },
@@ -12,23 +12,38 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.1221.0",
-    "axios": "^0.27.2",
-    "body-parser": "^1.20.0",
-    "cors": "^2.8.5",
+    "@aws-sdk/client-s3": "3.1161.0",
+    "@aws-sdk/lib-storage": "3.1161.0",
+    "axios": "1.20.0",
+    "body-parser": "1.20.9",
+    "cors": "2.8.6",
     "dotenv": "^16.0.2",
-    "express": "^4.18.1",
-    "express-fileupload": "^1.4.0",
-    "ffmpeg-static": "^5.1.0",
-    "joi": "^17.6.0",
-    "lodash": "^4.17.21",
-    "pg": "^8.8.0",
-    "sharp": "^0.31.0",
-    "simple-thumbnail": "^1.6.5",
-    "tc-core-library-js": "topcoder-platform/tc-core-library-js.git#master",
-    "topcoder-bus-api-wrapper": "topcoder-platform/tc-bus-api-wrapper.git"
+    "express": "4.21.2",
+    "express-fileupload": "1.5.2",
+    "joi": "17.13.9",
+    "lodash": "4.18.1",
+    "pg": "8.23.1",
+    "sharp": "0.35.5",
+    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/a25576b8b038211d1ba910eca2d900271ba6659d"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "3.1.14"
+  },
+  "engines": {
+    "node": "26.x"
+  },
+  "overrides": {
+    "body-parser": "$body-parser",
+    "joi": "$joi",
+    "lodash": "$lodash",
+    "axios": "$axios",
+    "brace-expansion": "5.0.12",
+    "minimatch": "11.0.1",
+    "follow-redirects": "1.16.2",
+    "form-data": "4.0.6",
+    "path-to-regexp@^0.1": "0.1.13",
+    "proxy-addr": "2.0.8",
+    "qs": "6.16.1",
+    "picomatch@^2": "2.3.2"
   }
 }
