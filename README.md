@@ -135,3 +135,11 @@ The base url is by default localhost:3000. You can change it also in the postman
 
 
 
+
+## Maintained runtime and security checks
+
+Use Node.js 26 and `npm ci`. The production image runs as UID 10001 and contains production dependencies only. `config.js` maps the documented environment variables; `.env` files are excluded from Git and Docker build contexts. Existing JSON-array, comma-separated, and space-separated `VALID_ISSUERS` values are accepted. Supply `JWT_AUDIENCE` for RSA user tokens and `AUTH0_AUDIENCE` for machine tokens. Legacy HMAC user tokens require an explicit `AUTH_SECRET` of at least 32 bytes. Administrator handles still come from `ADMIN_USERS`.
+
+S3 uses AWS SDK v3, including multipart uploads and the default ECS credential provider. Explicit access keys, optional `AWS_SESSION_TOKEN`, and local `IS_LOCAL_DB`/`AWS_ENDPOINT` settings are supported. Sharp generates image previews. Video previews retain the original video URL; the unused thumbnail generator and bundled FFmpeg have been removed.
+
+Run `npm test` for local HTTP authentication, token caching, BUS notification, signed S3 uploads, multipart uploads, failure handling, and native image resize tests. Tests require no real cloud credentials or database.

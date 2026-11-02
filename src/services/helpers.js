@@ -1,35 +1,33 @@
 const config = require("../../config");
-const AWS = require("aws-sdk");
+const { S3Client } = require('@aws-sdk/client-s3')
+const { Upload } = require('@aws-sdk/lib-storage')
 const _ = require('lodash')
 const axios = require('axios')
-const ffmpegPath = require('ffmpeg-static')
-const fs = require('fs')
-const genThumbnail = require('simple-thumbnail')
 const sharp = require('sharp')
-const busApi = require('topcoder-bus-api-wrapper')
-const m2mAuth = require('tc-core-library-js').auth.m2m
-const m2m = m2mAuth(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME']))
+const busApi = require('tc-core-library-js').createBusApiClient
+const m2mAuth = require('tc-core-library-js').createM2MClient
+const m2m = m2mAuth(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME', 'AUTH0_PROXY_SERVER_URL']))
 
 
 const constants = require('../../constants')
 
 const awsConfig = {
-    s3: config.AMAZON.S3_API_VERSION,
     region: config.AMAZON.AWS_REGION
 }
 
 if (config.AMAZON.IS_LOCAL) {
     awsConfig.endpoint = config.AMAZON.ENDPOINT
-    awsConfig.s3ForcePathStyle = true
+    awsConfig.forcePathStyle = true
 }
 
 if (config.AMAZON.AWS_ACCESS_KEY_ID && config.AMAZON.AWS_SECRET_ACCESS_KEY) {
-    awsConfig.accessKeyId = config.AMAZON.AWS_ACCESS_KEY_ID
-    awsConfig.secretAccessKey = config.AMAZON.AWS_SECRET_ACCESS_KEY
+    awsConfig.credentials = {
+        accessKeyId: config.AMAZON.AWS_ACCESS_KEY_ID,
+        secretAccessKey: config.AMAZON.AWS_SECRET_ACCESS_KEY,
+        sessionToken: config.AMAZON.AWS_SESSION_TOKEN
+    }
 }
-AWS.config.update(awsConfig)
-
-const s3 = new AWS.S3()
+const s3 = new S3Client(awsConfig)
 let busApiClient
 
 /**
@@ -58,10 +56,6 @@ function getBusApiClient() {
  */
 async function getM2MToken() {
     try {
-        // TODO: remove code below
-        if (config.IS_DEV) {
-            console.log(`${config.AUTH0_CLIENT_ID}|${config.AUTH0_CLIENT_SECRET}`)
-        }
         const res = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
         return res
     } catch (e) {
@@ -86,9 +80,9 @@ async function uploadToBucket(data, fileName, mimetype) {
     try {
         console.log(`INFO: Uploading ${fileName} to S3 Bucket`)
         // Upload to S3
-        await s3.upload(params).promise()
+        await new Upload({ client: s3, params }).done()
     } catch (e) {
-        e.message = `ERROR: Failed to upload file '${fileName + fileExt}' to S3 Bucket. Error message: ${e.message}`
+        e.message = `ERROR: Failed to upload file '${fileName}' to S3 Bucket. Error message: ${e.message}`
         throw e
     }
 
@@ -134,39 +128,6 @@ async function createResizedImage(fileData, fileName) {
     }
 }
 
-async function createThumbnail(videoUrl, numOfFiles, fileName) {
-    const tempFilePath = `.\\${fileName}.jpg`
-
-    // create Thumbnail image
-    try {
-        console.log(`INFO: Creating thumbnail '${fileName}'`)
-        await genThumbnail(videoUrl, tempFilePath, '100%', {
-            path: ffmpegPath
-        })
-    } catch (e) {
-        e.message = `ERROR: Failed to create Thumbnail image for '${fileName}'. Error message: ${e.message}`
-        throw e
-    }
-
-    // create Preview for Thumbnail image
-    try {
-        const res = fs.readFileSync(tempFilePath)
-        var result = await createPreviewImage(res, numOfFiles, tempFilePath)
-        return result
-    } catch (e) {
-        e.message = `ERROR: Failed to create Preview for Thumbnail image of '${fileName}'. Error message: ${e.message}`
-        throw e
-    } finally {
-        // delete temp file
-        console.log(`INFO: Deleting temp file: ${tempFilePath}`)
-        fs.unlink(tempFilePath, (e) => {
-            if (e) {
-                console.log(`WARN: Failed to delete temp file '${tempFilePath}'. Error details: ${e.message}`)
-            }
-        })
-    }
-}
-
 async function uploadMedia(file, numOfFiles) {
     const fileExt = file.name.substr(file.name.lastIndexOf('.'))
     const fileName = file.name + '-' + new Date().getTime()
@@ -188,9 +149,6 @@ async function uploadMedia(file, numOfFiles) {
         const previewData = await createPreviewImage(file.data, numOfFiles, file.name)
         previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
     } else if (file.mimetype.includes('video')) {
-        // this is not working anylonger after local file access was restricted on EC2 instances
-        // const previewData = await createThumbnail(url, numOfFiles, fileName)
-        // previewUrl = await uploadToBucket(previewData, fileName + '-preview.jpg', 'image/jpeg')
         isVideo = true
     }
     else {
