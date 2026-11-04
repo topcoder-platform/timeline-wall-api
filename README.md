@@ -57,6 +57,7 @@ PREVIEW_MAX_HEIGHT=
 MEDIA_SIZE_LIMIT=
 ```
 - SERVER_PORT the port used by the server
+- API_PREFIX the route prefix (defaults to `/v5/timeline-wall`; set to an empty string to serve at the root)
 - AUTH_SECRET the authentication secret for token verification
 - VALID_ISSUERS the (space separated) list of valid issuers for the auth token
 - ADMIN_USERS the (space separated) list of handles of admin users
@@ -71,6 +72,7 @@ MEDIA_SIZE_LIMIT=
 - DB_HOST the database host (do not set if using docker database)
 - DB_NAME the database name (do not set if using docker database)
 - DB_PORT the database port (default is 5432, do not set if using docker database)
+- DB_SCHEMA the database schema; also accepts the deployed `DB_SCHEMA_NAME` setting when `DB_SCHEMA` is unset (defaults to `public`)
 - BUSAPI_URL the url of the BUS API
 - EVENT_APPROVED_TEMPLATE_ID the sendgrid template id for approved event email
 - EVENT_REJECTED_TEMPLATE_ID the sendgrid template id for rejected event email
@@ -82,8 +84,8 @@ MEDIA_SIZE_LIMIT=
 - AUTH0_CLIENT_ID used by the bus api
 - AUTH0_CLIENT_SECRET used y the bus api
 - KAFKA_ERROR_TOPIC used by the bus api
-- PREVIEW_MAX_WIDTH the max width of preview images
-- PREVIEW_MAX_HEIGHT the max height of preview images
+- PREVIEW_MAX_WIDTH the max width of preview images (also accepts `PREVIEW_WIDTH`)
+- PREVIEW_MAX_HEIGHT the max height of preview images (also accepts `PREVIEW_HEIGHT`)
 - MEDIA_SIZE_LIMIT the maximum size of media files that can be uploaded
 
 ## Execute
