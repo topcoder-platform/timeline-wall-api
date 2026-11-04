@@ -6,7 +6,7 @@ require('dotenv').config()
 const env = process.env
 module.exports = {
   SERVER_PORT: Number(env.SERVER_PORT || 3001),
-  API_PREFIX: env.API_PREFIX || '',
+  API_PREFIX: env.API_PREFIX ?? '/v5/timeline-wall',
   AUTH_SECRET: env.AUTH_SECRET,
   VALID_ISSUERS: env.VALID_ISSUERS?.trim().startsWith('[') ? JSON.parse(env.VALID_ISSUERS) : (env.VALID_ISSUERS || '').split(/[\s,]+/).filter(Boolean),
   ADMIN_USERS: (env.ADMIN_USERS || '').split(/\s+/).filter(Boolean),
@@ -21,8 +21,8 @@ module.exports = {
   BUSAPI_URL: env.BUSAPI_URL || 'https://api.topcoder-dev.com/v5',
   KAFKA_ERROR_TOPIC: env.KAFKA_ERROR_TOPIC || 'common.error.reporting',
   PHOTO_URL_TEMPLATE: env.PHOTO_URL_TEMPLATE,
-  PREVIEW_MAX_WIDTH: Number(env.PREVIEW_MAX_WIDTH || 600),
-  PREVIEW_MAX_HEIGHT: Number(env.PREVIEW_MAX_HEIGHT || 400),
+  PREVIEW_MAX_WIDTH: Number(env.PREVIEW_MAX_WIDTH || env.PREVIEW_WIDTH || 600),
+  PREVIEW_MAX_HEIGHT: Number(env.PREVIEW_MAX_HEIGHT || env.PREVIEW_HEIGHT || 400),
   RESIZED_IMAGE_MAX_WIDTH: Number(env.RESIZED_IMAGE_MAX_WIDTH || 1920),
   RESIZED_IMAGE_MAX_HEIGHT: Number(env.RESIZED_IMAGE_MAX_HEIGHT || 1080),
   MEDIA_SIZE_LIMIT: env.MEDIA_SIZE_LIMIT ? Number(env.MEDIA_SIZE_LIMIT) : Infinity,
@@ -39,7 +39,7 @@ module.exports = {
   DATABASE: {
     USER: env.DB_USER, PASSWORD: env.DB_PASSWORD, HOST: env.DB_HOST || 'localhost',
     NAME: env.DB_NAME || 'topcoder-timeline', PORT: Number(env.DB_PORT || 5432),
-    SCHEMA: env.DB_SCHEMA || 'public'
+    SCHEMA: env.DB_SCHEMA || env.DB_SCHEMA_NAME || 'public'
   },
   EMAIL: {
     EMAIL_FROM: env.EMAIL_FROM,

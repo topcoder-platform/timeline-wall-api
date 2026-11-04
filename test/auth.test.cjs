@@ -3,6 +3,7 @@ const assert = require('node:assert/strict')
 const { createHmac } = require('node:crypto')
 const { once } = require('node:events')
 Object.assign(process.env, {
+  API_PREFIX: '',
   AUTH_SECRET: 'a-fixture-secret-with-at-least-32-bytes',
   VALID_ISSUERS: 'https://issuer.test.invalid/ https://another.test.invalid/',
   JWT_AUDIENCE: 'fixture-browser', AUTH0_AUDIENCE: 'fixture-machine',
