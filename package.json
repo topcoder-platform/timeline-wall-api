@@ -24,7 +24,7 @@
     "lodash": "4.18.1",
     "pg": "8.23.1",
     "sharp": "0.35.5",
-    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/58de37670180e183e8378c3d203df0112a0414f6"
+    "tc-core-library-js": "https://codeload.github.com/topcoder-platform/tc-core-library-js/tar.gz/2067e74f73d7fe3442c96f375fc97f8486f79be4"
   },
   "devDependencies": {
     "nodemon": "3.1.14"
