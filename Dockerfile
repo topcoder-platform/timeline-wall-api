@@ -5,6 +5,9 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm test && npm prune --omit=dev
+# This upstream development lock is not the installed dependency graph.
+# Keep actual package.json metadata and the consumer lockfile intact.
+RUN rm -f node_modules/tc-core-library-js/pnpm-lock.yaml
 
 FROM alpine:3.24 AS production
 ARG NODE_VERSION
