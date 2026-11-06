@@ -13,7 +13,7 @@ Object.assign(process.env, {
 
 function token (claims, secret = process.env.AUTH_SECRET) {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
-  const payload = Buffer.from(JSON.stringify({ iss: 'https://issuer.test.invalid/', exp: Math.floor(Date.now() / 1000) + 60, userId: '123', ...claims })).toString('base64url')
+  const payload = Buffer.from(JSON.stringify({ emailVerified: true, iss: 'https://issuer.test.invalid/', exp: Math.floor(Date.now() / 1000) + 60, userId: '123', ...claims })).toString('base64url')
   const data = `${header}.${payload}`
   return `${data}.${createHmac('sha256', secret).update(data).digest('base64url')}`
 }
