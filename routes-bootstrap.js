@@ -1,15 +1,16 @@
 const routes = require('./src/routes')
 const _ = require('lodash')
 const config = require("./config")
-const authenticator = require('tc-core-library-js').middleware.jwtAuthenticator
+const authenticator = require('tc-core-library-js').createJwtAuthenticator
 
 
 module.exports = (app) => {
+    const authenticate = authenticator(_.pick(config, ['AUTH_SECRET', 'VALID_ISSUERS', 'JWT_AUDIENCE', 'AUTH0_AUDIENCE']))
     _.each(routes, (verbs, path) => {
         _.each(verbs, (route, verb) => {
 
             if(route.auth){
-                app[verb](path, authenticator({ AUTH_SECRET: config.AUTH_SECRET, VALID_ISSUERS: config.VALID_ISSUERS }))
+                app[verb](path, authenticate)
                 app[verb](path, (req, res, next) => {
                     req.authUser.isAdmin = config.ADMIN_USERS.includes(req.authUser.handle)
                     next()
