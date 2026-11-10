@@ -57,6 +57,7 @@ PREVIEW_MAX_HEIGHT=
 MEDIA_SIZE_LIMIT=
 ```
 - SERVER_PORT the port used by the server
+- API_PREFIX the route prefix (defaults to `/v5/timeline-wall`; set to an empty string to serve at the root)
 - AUTH_SECRET the authentication secret for token verification
 - VALID_ISSUERS the (space separated) list of valid issuers for the auth token
 - ADMIN_USERS the (space separated) list of handles of admin users
@@ -71,6 +72,7 @@ MEDIA_SIZE_LIMIT=
 - DB_HOST the database host (do not set if using docker database)
 - DB_NAME the database name (do not set if using docker database)
 - DB_PORT the database port (default is 5432, do not set if using docker database)
+- DB_SCHEMA the database schema; also accepts the deployed `DB_SCHEMA_NAME` setting when `DB_SCHEMA` is unset (defaults to `public`)
 - BUSAPI_URL the url of the BUS API
 - EVENT_APPROVED_TEMPLATE_ID the sendgrid template id for approved event email
 - EVENT_REJECTED_TEMPLATE_ID the sendgrid template id for rejected event email
@@ -82,8 +84,8 @@ MEDIA_SIZE_LIMIT=
 - AUTH0_CLIENT_ID used by the bus api
 - AUTH0_CLIENT_SECRET used y the bus api
 - KAFKA_ERROR_TOPIC used by the bus api
-- PREVIEW_MAX_WIDTH the max width of preview images
-- PREVIEW_MAX_HEIGHT the max height of preview images
+- PREVIEW_MAX_WIDTH the max width of preview images (also accepts `PREVIEW_WIDTH`)
+- PREVIEW_MAX_HEIGHT the max height of preview images (also accepts `PREVIEW_HEIGHT`)
 - MEDIA_SIZE_LIMIT the maximum size of media files that can be uploaded
 
 ## Execute
@@ -135,3 +137,11 @@ The base url is by default localhost:3000. You can change it also in the postman
 
 
 
+
+## Maintained runtime and security checks
+
+Use Node.js 26 and `npm ci`. The production image runs as UID 10001 and contains production dependencies only. `config.js` maps the documented environment variables; `.env` files are excluded from Git and Docker build contexts. Existing JSON-array, comma-separated, and space-separated `VALID_ISSUERS` values are accepted. Supply `JWT_AUDIENCE` for RSA user tokens and `AUTH0_AUDIENCE` for machine tokens. Legacy HMAC user tokens require an explicit `AUTH_SECRET` of at least 32 bytes. Administrator handles still come from `ADMIN_USERS`.
+
+S3 uses AWS SDK v3, including multipart uploads and the default ECS credential provider. Explicit access keys, optional `AWS_SESSION_TOKEN`, and local `IS_LOCAL_DB`/`AWS_ENDPOINT` settings are supported. Sharp generates image previews. Video previews retain the original video URL; the unused thumbnail generator and bundled FFmpeg have been removed.
+
+Run `npm test` for local HTTP authentication, token caching, BUS notification, signed S3 uploads, multipart uploads, failure handling, and native image resize tests. Tests require no real cloud credentials or database.
