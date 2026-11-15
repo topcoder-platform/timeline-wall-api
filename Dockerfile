@@ -1,4 +1,4 @@
-ARG NODE_VERSION=26.12.1
+ARG NODE_VERSION=26.13.1
 FROM node:${NODE_VERSION}-alpine AS build
 WORKDIR /timeline-wall-api
 COPY package.json package-lock.json ./
@@ -14,7 +14,7 @@ ARG NODE_VERSION
 ENV NODE_ENV=production
 WORKDIR /timeline-wall-api
 RUN apk upgrade --no-cache \
-    && apk add --no-cache ca-certificates "nodejs-current~${NODE_VERSION%%.*}" \
+    && apk add --no-cache ca-certificates "nodejs-current~${NODE_VERSION%%.*}" "nodejs-current>=26.13.1-r0" "zlib>=1.4-r0" \
     && addgroup -S -g 10001 app \
     && adduser -S -D -u 10001 -G app -h /home/app app
 COPY --from=build --chown=app:app /timeline-wall-api/package.json /timeline-wall-api/package-lock.json ./
